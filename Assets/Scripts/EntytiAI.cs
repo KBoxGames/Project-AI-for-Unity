@@ -1,11 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+
 
 public class EntytiAI : MonoBehaviour
 
 
 {
+
+    private NavMeshAgent Agent;
+    
     public  float Health;
     public int Hangry;
     public int HangryIntencity;
@@ -52,14 +57,17 @@ public class EntytiAI : MonoBehaviour
     const float UnitPerCircle = 6.28f; //360 градусов
      // -------------------------------------------------------------------------
 
+       
 
-
+        
 
 
 
 
     void Start()
     {
+
+         Agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         Health = 100;
         Hangry = 0;
         TimerHangry = 0;
@@ -124,8 +132,8 @@ public class EntytiAI : MonoBehaviour
         }
     }
 
-
     //---------------------------------------Ж\Параметры------------------------------------------------
+
     void UpdateHangry()
     {
         TimerHangry += Time.deltaTime;
@@ -243,9 +251,14 @@ public class EntytiAI : MonoBehaviour
     void Walking()
     {
         Debug.Log("Иду к цели...");
-        Test();
+        Agent.destination = Target.transform.position;
+        
+        
+        
     }
+
     // ---------------------------------------Cознание---------------------------------------------------
+
     void UpdateState()
     {
         
@@ -280,9 +293,18 @@ public class EntytiAI : MonoBehaviour
         Debug.Log("NOOOOOOOOOOOOOOOOOOT");
     }
 
-
     //------------------------------------------TEST-----------------------------------------------------
-    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Food")
+        {
+            Hangry = Hangry - 20;
+            Destroy(other.gameObject);
+
+        }
+    }
+   
+
     void Test()
     {
         Hangry -= HangryIntencity;
