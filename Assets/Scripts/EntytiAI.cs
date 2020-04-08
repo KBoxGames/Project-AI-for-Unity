@@ -63,9 +63,7 @@ public class EntytiAI : MonoBehaviour
         Health = 100;
         Hangry = 0;
         TimerHangry = 0;
-       // HangryIntencity = 2;
-       // Mrigidbody = GetComponent<Rigidbody>();
-        //Mrigidbody.constraints = RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationX;
+        HangryIntencity = 2;
         TargetCapturet = false;
         
     }
@@ -89,11 +87,7 @@ public class EntytiAI : MonoBehaviour
 
         }
 
-        if (State == Condition.Dead)
-        {
-            DeadEntity();
-            LookAT_();
-        }
+        
 
     }
 
@@ -281,11 +275,9 @@ public class EntytiAI : MonoBehaviour
     void DeadEntity()
     {
 
-        Target.transform.position = new Vector3(transform.position.x, -500f, transform.position.z);
-        // Mrigidbody.constraints = RigidbodyConstraints.None;
-        // transform.rotation = Quaternion.Euler(-90f, transform.rotation.eulerAngles.y, Random.Range(-3f,3f));
+        transform.rotation = Quaternion.Euler(90f, transform.rotation.y, transform.rotation.z);
         Alive = false;
-        Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        Debug.Log("NOOOOOOOOOOOOOOOOOOT");
     }
 
 
