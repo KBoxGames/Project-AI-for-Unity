@@ -27,8 +27,8 @@ public class EntytiAI : MonoBehaviour
     private float TimerLook;
     private float TimerFind;
 
-    private bool FindComplete = false;
-    private bool FindEmpty = true;
+    public bool FindComplete = false;
+    public bool FindEmpty = true;
 
     private Vector3 TargetPosition;
 
@@ -148,7 +148,7 @@ public class EntytiAI : MonoBehaviour
     {
         if (Hangry == 100)
         {
-            Health -= 1f;
+            Health -= 0.001f;
         }
 
         if (Health <= 0)
@@ -218,12 +218,22 @@ public class EntytiAI : MonoBehaviour
                     if (HitFood.distance < DistanceToFood)
                     {
                         DistanceToFood = HitFood.distance;
-                        Debug.Log(HitFood.collider.gameObject.tag);
+                        Debug.Log(HitFood.collider.gameObject.tag + " Вижу");
                         CL = Color.green;
 
                         TargetPosition = HitFood.collider.gameObject.transform.position - new Vector3(0, HitFood.collider.gameObject.transform.position.y, 0);
                         temp = HitFood.collider.gameObject;
                         FindEmpty = false;
+
+                        if (!FindEmpty)
+                        {
+                            Target.transform.position = TargetPosition;
+                            Debug.Log("Захват цели " + Tag);
+                            TimerFind = 0;
+                            FindEmpty = true;
+                            FindComplete = true;
+                            DistanceToFood = 100;
+                        }
                     }
                 }
                 else FindEmpty = true;
@@ -237,13 +247,14 @@ public class EntytiAI : MonoBehaviour
             BY = BY + StepV;
         }
 
-        if (TimerFind > 5 && !FindEmpty)
+        if (!FindEmpty)
         {
             Target.transform.position = TargetPosition;
             Debug.Log("Захват цели " + Tag);
             TimerFind = 0;
             FindEmpty = true;
             FindComplete = true;
+            DistanceToFood = 100;
         }
 
     }
@@ -299,6 +310,7 @@ public class EntytiAI : MonoBehaviour
         if (other.gameObject.tag == "Food")
         {
             Hangry = Hangry - 20;
+            FindComplete = false;
             Destroy(other.gameObject);
 
         }
