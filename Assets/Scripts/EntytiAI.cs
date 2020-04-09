@@ -29,6 +29,7 @@ public class EntytiAI : MonoBehaviour
 
     public bool FindComplete = false;
     public bool FindEmpty = true;
+ 
 
     private Vector3 TargetPosition;
 
@@ -93,6 +94,7 @@ public class EntytiAI : MonoBehaviour
 
             UpdateState();
 
+            
         }
 
         
@@ -102,11 +104,14 @@ public class EntytiAI : MonoBehaviour
     void TheChoiceOfAcion()
     {
          
-
         switch (State)
         {
             case Condition.Rest:
-                if(!TargetCapturet) RandomTarget();
+                if (!TargetCapturet)
+                {
+                 RandomTarget();
+                    Walking();
+                }
              
                 Debug.Log("Отдых");
                 break;
@@ -148,7 +153,7 @@ public class EntytiAI : MonoBehaviour
     {
         if (Hangry == 100)
         {
-            Health -= 0.001f;
+            Health -= 0.1f;
         }
 
         if (Health <= 0)
@@ -166,7 +171,7 @@ public class EntytiAI : MonoBehaviour
          transform.rotation = Quaternion.LookRotation(newDirection);
                        
         TimerLook += Time.deltaTime;
-        if (TargetCapturet && TimerLook > 5)
+        if (TargetCapturet && TimerLook > 2)
         {
             TimerLook = 0;
             TargetCapturet = false;
@@ -217,26 +222,15 @@ public class EntytiAI : MonoBehaviour
                 {
                     if (HitFood.distance < DistanceToFood)
                     {
-                        DistanceToFood = HitFood.distance;
+                       
                         Debug.Log(HitFood.collider.gameObject.tag + " Вижу");
                         CL = Color.green;
-
-                        TargetPosition = HitFood.collider.gameObject.transform.position - new Vector3(0, HitFood.collider.gameObject.transform.position.y, 0);
-                        temp = HitFood.collider.gameObject;
-                        FindEmpty = false;
-
-                        if (!FindEmpty)
-                        {
-                            Target.transform.position = TargetPosition;
-                            Debug.Log("Захват цели " + Tag);
-                            TimerFind = 0;
-                            FindEmpty = true;
-                            FindComplete = true;
-                            DistanceToFood = 100;
-                        }
+                        Target.transform.position = HitFood.collider.gameObject.transform.position;
+                        FindComplete = true;
+                       
                     }
                 }
-                else FindEmpty = true;
+                
 
                 Debug.DrawRay(transform.position, transform.TransformDirection(new Vector3(BX, BY, BZ)) * 10, CL);
                 step_ = step_ + step;
@@ -247,22 +241,13 @@ public class EntytiAI : MonoBehaviour
             BY = BY + StepV;
         }
 
-        if (!FindEmpty)
-        {
-            Target.transform.position = TargetPosition;
-            Debug.Log("Захват цели " + Tag);
-            TimerFind = 0;
-            FindEmpty = true;
-            FindComplete = true;
-            DistanceToFood = 100;
-        }
-
     }
 
     void Walking()
     {
         Debug.Log("Иду к цели...");
         Agent.destination = Target.transform.position;
+        
         
         
         
@@ -276,12 +261,24 @@ public class EntytiAI : MonoBehaviour
         if (Hangry <= 5 )
         {
             State = Condition.Rest;
-        }
+        } // если не голоден то гуляешь
 
-        if (Hangry > 70)
+        if (Hangry > 70 && TimerFind < 10)
         {
             State = Condition.FinderFood;
-        }
+        } //если голоден и ищешь пищу менее 10 сек
+
+        if (Hangry > 70 && TimerFind > 10)
+        {
+            State = Condition.Rest;
+            TimerFind += Time.deltaTime;
+        } //если голоден и не чего не нашел в течении 10 сек, то идешь на новое место
+
+        if (Agent.pathStatus == NavMeshPathStatus.PathComplete && TimerFind > 20)
+        {
+            State = Condition.FinderFood;
+            TimerFind = 0;
+        } //  если поиск более 20 сек не дал результатов, и пришел на новое место то начинаешь искать с начала
 
         if (Health <= 0)
         {
@@ -293,6 +290,14 @@ public class EntytiAI : MonoBehaviour
             State = Condition.Walking;
         }
 
+        if (Agent.pathStatus == NavMeshPathStatus.PathComplete && Hangry < 70)
+        {
+            Debug.Log("Пришел в точку! Гуляю");
+            State = Condition.Rest;
+        }
+
+        
+
 
     } 
 
@@ -302,14 +307,15 @@ public class EntytiAI : MonoBehaviour
         transform.rotation = Quaternion.Euler(90f, transform.rotation.y, transform.rotation.z);
         Alive = false;
         Debug.Log("NOOOOOOOOOOOOOOOOOOT");
+        Destroy(this.gameObject);
     }
 
     //------------------------------------------TEST-----------------------------------------------------
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Food")
+        if (other.gameObject.tag == "Food" && Hangry > 50)
         {
-            Hangry = Hangry - 20;
+            Hangry = Hangry - 50; 
             FindComplete = false;
             Destroy(other.gameObject);
 
